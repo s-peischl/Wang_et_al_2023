@@ -1,0 +1,98 @@
+---
+title: "PlotSimulatedSFS_Fig4B"
+output: html_document
+date: "2023-05-02"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load neutral simulation data and calcualte SFS
+```{r , echo=FALSE}
+library(dplyr)
+library(ggplot2)
+
+
+ms_binary_conjoined <- read.table("~/Dropbox/ScienceProjects/GeraldHeckel/diversity_neut_2.txt", skip = 3, colClasses = "character")
+
+# split each line into its elements as separate columns
+ms_binary <- apply(ms_binary_conjoined, 1, function(x) as.integer(unlist(strsplit(x,""))))
+# flip axes so it matches with original file
+ms_binary <- t(ms_binary)
+
+dim(ms_binary)
+reps = 1000
+
+inds = sample(1:1000,10)
+dat = ms_binary[inds,]
+sfs.vec = colSums(dat)
+sfs.vec = factor(sfs.vec,levels = 1:10)
+sfs = table(sfs.vec)
+
+
+sfs.tot = sfs
+
+for(i in 1 : reps)
+{
+  inds = sample(1:1000,10)
+  dat = ms_binary[inds,]
+  sfs.vec = colSums(dat)
+  sfs.vec = factor(sfs.vec,levels = 1:10)
+  sfs = table(sfs.vec)
+  sfs.tot = sfs.tot + sfs
+  
+  
+}
+sfs.tot = sfs.tot/reps
+sfs.tot[10] = sfs.tot[10]+371
+
+sfs.fin = sfs.tot / sum(sfs.tot)
+
+barplot(sfs.fin)
+sfs.neut=sfs.fin
+
+
+```
+
+# Load deleterious simulation data and calcualte SFS
+```{r , echo=FALSE}
+ms_binary_conjoined <- read.table("~/Dropbox/ScienceProjects/GeraldHeckel/diversity_del_3.txt", skip = 3, colClasses = "character")
+
+# split each line into its elements as separate columns
+ms_binary <- apply(ms_binary_conjoined, 1, function(x) as.integer(unlist(strsplit(x,""))))
+# flip axes so it matches with original file
+ms_binary <- t(ms_binary)
+inds = sample(1:1000,10)
+dat = ms_binary[inds,]
+sfs.vec = colSums(dat)
+sfs.vec = factor(sfs.vec,levels = 1:10)
+sfs = table(sfs.vec)
+
+
+sfs.tot = sfs
+
+for(i in 1 : reps)
+{
+  inds = sample(1:1000,10)
+  dat = ms_binary[inds,]
+  sfs.vec = colSums(dat)
+  sfs.vec = factor(sfs.vec,levels = 1:10)
+  sfs = table(sfs.vec)
+  sfs.tot = sfs.tot + sfs
+  
+  
+}
+sfs.tot = sfs.tot/reps
+sfs.tot[10] = sfs.tot[10]+131
+
+sfs.fin = sfs.tot / sum(sfs.tot)
+
+barplot(sfs.fin)
+sfs.del=sfs.fin
+
+
+
+barplot(rbind(sfs.neut,sfs.del),beside = T)
+
+```
